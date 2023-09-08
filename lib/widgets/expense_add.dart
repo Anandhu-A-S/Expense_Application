@@ -1,4 +1,6 @@
+import 'package:expense_application/models/expense.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class ExpenseAdd extends StatefulWidget {
   const ExpenseAdd({super.key});
@@ -10,6 +12,20 @@ class ExpenseAdd extends StatefulWidget {
 class _ExpenseAddState extends State<ExpenseAdd> {
   final _titleController = TextEditingController();
   final _moneyController = TextEditingController();
+  DateTime? selectedDate;
+  final formatter = DateFormat.yMd();
+  void _presentDatePicker() async {
+    final now = DateTime.now();
+    final firstDate = DateTime(now.year - 1);
+    DateTime? pickedDate = await showDatePicker(
+        context: context,
+        initialDate: now,
+        firstDate: firstDate,
+        lastDate: now);
+    setState(() {
+      selectedDate = pickedDate;
+    });
+  }
 
   @override
   void dispose() {
@@ -33,14 +49,33 @@ class _ExpenseAddState extends State<ExpenseAdd> {
               label: Text('Title'),
             ),
           ),
-          TextFormField(
-            controller: _moneyController,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              icon: Icon(Icons.money),
-              hintText: 'Enter the Amount',
-              label: Text('Amount'),
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: TextFormField(
+                  controller: _moneyController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    icon: Icon(Icons.money),
+                    hintText: 'Enter the Amount',
+                    label: Text('Amount'),
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Row(
+                  children: [
+                    const Spacer(),
+                    Text(selectedDate == null
+                        ? "Not selected"
+                        : formatter.format(selectedDate!)),
+                    IconButton(
+                        onPressed: _presentDatePicker,
+                        icon: const Icon(Icons.calendar_month)),
+                  ],
+                ),
+              )
+            ],
           ),
           Row(
             children: [
