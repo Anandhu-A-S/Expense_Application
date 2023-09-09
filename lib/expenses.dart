@@ -26,17 +26,28 @@ class _ExpensesState extends State<Expenses> {
       category: Category.food,
     ),
   ];
+  void addbuttonExpand() {
+    showModalBottomSheet(
+        isScrollControlled: true,
+        context: context,
+        builder: (ctx) {
+          return Padding(
+            padding: const EdgeInsets.fromLTRB(0, 30, 0, 0),
+            child: ExpenseAdd(
+              addFunction: addNewExpense,
+            ),
+          );
+        });
+  }
+
+  void addNewExpense(Expense newExpense) {
+    setState(() {
+      _registedExpenses.add(newExpense);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    void addbuttonExpand() {
-      showModalBottomSheet(
-          context: context,
-          builder: (ctx) {
-            return const ExpenseAdd();
-          });
-    }
-
     return SafeArea(
       child: Scaffold(
           appBar: AppBar(

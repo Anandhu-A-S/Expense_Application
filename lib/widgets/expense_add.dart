@@ -1,10 +1,11 @@
 import 'package:expense_application/models/expense.dart';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 class ExpenseAdd extends StatefulWidget {
-  const ExpenseAdd({super.key});
-
+  ExpenseAdd({super.key, required this.addFunction});
+  final void Function(Expense expense) addFunction;
   @override
   State<ExpenseAdd> createState() => _ExpenseAddState();
 }
@@ -12,8 +13,12 @@ class ExpenseAdd extends StatefulWidget {
 class _ExpenseAddState extends State<ExpenseAdd> {
   final _titleController = TextEditingController();
   final _moneyController = TextEditingController();
+  double? amount = 0;
+
   DateTime? selectedDate;
+  Category categoryItem = Category.lesiure;
   final formatter = DateFormat.yMd();
+
   void _presentDatePicker() async {
     final now = DateTime.now();
     final firstDate = DateTime(now.year - 1);
@@ -25,6 +30,38 @@ class _ExpenseAddState extends State<ExpenseAdd> {
     setState(() {
       selectedDate = pickedDate;
     });
+  }
+
+  void _expenseAddFunction() {
+    final amountValidity =
+        double.tryParse(_moneyController.text.trim()) == null;
+    if (_titleController.text.trim().isEmpty ||
+        amountValidity ||
+        selectedDate == null) {
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text("Fill all fields"),
+          content: const Text("Fill all the fields "),
+          actions: [
+            TextButton(
+                onPressed: () {
+                  Navigator.pop(ctx);
+                },
+                child: const Text("okey"))
+          ],
+        ),
+      );
+      return;
+    }
+
+    amount = double.tryParse(_moneyController.text);
+
+    widget.addFunction(Expense(
+        title: _titleController.text,
+        amount: amount!,
+        dateTime: selectedDate!,
+        category: categoryItem));
   }
 
   @override
@@ -77,14 +114,28 @@ class _ExpenseAddState extends State<ExpenseAdd> {
               )
             ],
           ),
+          const SizedBox(
+            height: 8,
+          ),
           Row(
             children: [
+              DropdownButton(
+                  value: categoryItem,
+                  items: Category.values.map((value) {
+                    return DropdownMenuItem(
+                        value: value, child: Text(value.name.toUpperCase()));
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      if (value == null) {
+                        return;
+                      }
+                      categoryItem = value;
+                    });
+                  }),
               const Spacer(),
               OutlinedButton(
-                onPressed: () {
-                  print(_titleController.text);
-                  print(_moneyController.text);
-                },
+                onPressed: _expenseAddFunction,
                 style: OutlinedButton.styleFrom(
                   side: const BorderSide(width: 5.0, color: Colors.blue),
                 ),
